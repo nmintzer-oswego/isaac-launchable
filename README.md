@@ -19,8 +19,13 @@ The project includes:
 - Isaac Sim pre-installed
 - an Omniverse Kit App Streaming client, based on the [web-viewer-sample](https://github.com/NVIDIA-Omniverse/web-viewer-sample) project.
 
+
+
 ## Quickstart Guide
 This guide will get you started with a Visual Studio Code instance with Isaac Lab preinstalled, and an in-browser user interface provided by Kit App Streaming.
+
+> [!IMPORTANT]
+> This project is intended for learning purposes. It is not intended for production use.
 
 > [!NOTE]
 > Please note that Brev instances are pay-by-the hour. To make the best use of credits, stop instances when they are not in use. Stopped instances have a smaller storage charge.
@@ -33,6 +38,7 @@ This guide will get you started with a Visual Studio Code instance with Isaac La
 4. On the Brev instance page, scroll to the TCP/UDP ports section.
 5. Click the link for port 80 (HTTP) to open Visual Studio Code Server.
 6. The default password is `password`. This can be modified.
+    - To change the password, modify the `PASSWORD` environment variable in this [docker-compose.yml](https://github.com/isaac-sim/isaac-launchable/blob/main/isaac-lab/docker-compose.yml) file.
 7. Inside Visual Studio Code, continue with the [README.md](https://github.com/isaac-sim/isaac-launchable/blob/main/isaac-lab/vscode/README.md) instructions. A summary is provided below.
 8. Now you're in the Visual Studio Code dev environment! 
 
@@ -122,7 +128,7 @@ docker compose up -d
 7. Click Next.
 8. Under "Do you want a Jupyter Notebook experience" select "No, I don't want Jupyter".
 9. Select the TCP/UDP ports tab.
-10. Expose the following ports (for Visual Studio Code Server and Kit App Streaming). You can choose to limit these ports to be accessible only from certain IPs as well.
+10. Expose the following ports (for Visual Studio Code Server and Kit App Streaming) to a specific public IP address that will be using this service.
 ```
 80
 1024
@@ -134,7 +140,7 @@ docker compose up -d
 
 > [!NOTE]
 > GPUs with RT cores are required for Kit App Streaming. 
-> The compute specs and driver versions provided also need to be compatible with [Isaac Sim](https://docs.isaacsim.omniverse.nvidia.com/5.0.0/installation/requirements.html). The available drivers are not exposed on this Brev page currently.
+> The compute specs and driver versions provided also need to be compatible with [Isaac Sim](https://docs.isaacsim.omniverse.nvidia.com/latest/installation/requirements.html). The available drivers are not exposed on this Brev page currently.
 
 > [!IMPORTANT]
 > The project is not currently compatible with Crusoe instances. AWS has been tested and is used for the example launchable.
@@ -147,7 +153,7 @@ Congratulations! You now have a custom launchable.
 
 This project can also be used to run a containerized version of Isaac Sim and Isaac Lab.
 
-To use this project locally, you'll need a workstation that meets [Isaac Sim](https://docs.isaacsim.omniverse.nvidia.com/5.0.0/installation/requirements.html)'s requirements.
+To use this project locally, you'll need a workstation that meets [Isaac Sim](https://docs.isaacsim.omniverse.nvidia.com/latest/installation/requirements.html)'s requirements.
 
 
 1. Install the NVIDIA Container Toolkit: `sudo install nvidia-container-toolkit`

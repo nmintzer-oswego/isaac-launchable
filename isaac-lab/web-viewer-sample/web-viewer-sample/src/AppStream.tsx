@@ -11,8 +11,8 @@
  */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { AppStreamer, StreamEvent, StreamProps, DirectConfig, GFNConfig } from '@nvidia/omniverse-webrtc-streaming-library';
-import { GetConfig } from './config';
+import { AppStreamer, StreamEvent, StreamProps, DirectConfig, GFNConfig, StreamType } from '@nvidia/omniverse-webrtc-streaming-library';
+import StreamConfig from '../stream.config.json';
 
 
 interface AppStreamProps {
@@ -64,34 +64,33 @@ export default class AppStream extends Component<AppStreamProps, AppStreamState>
 
             let streamProps: StreamProps;
             let streamConfig: DirectConfig | GFNConfig;
-            let streamSource: 'gfn' | 'direct';
+            let streamSource: StreamType.DIRECT | StreamType.GFN;
 
-            if (GetConfig().source === 'gfn') {
-                    streamSource = 'gfn'
+            if (StreamConfig.source === 'gfn') {
+                    streamSource = StreamType.GFN;
                     streamConfig = {
                         //@ts-ignore
                         GFN             : GFN,
-                        catalogClientId : GetConfig().gfn.catalogClientId,
-                        clientId        : GetConfig().gfn.clientId,
-                        cmsId           : GetConfig().gfn.cmsId,
+                        catalogClientId : StreamConfig.gfn.catalogClientId,
+                        clientId        : StreamConfig.gfn.clientId,
+                        cmsId           : StreamConfig.gfn.cmsId,
                         onUpdate        : (message: StreamEvent) => this._onUpdate(message),
                         onStart         : (message: StreamEvent) => this._onStart(message),
                         onCustomEvent   : (message: any) => this._onCustomEvent(message)
                     }
             }
 
-            else if (GetConfig().source === 'local') {
-                streamSource = 'direct';
+            else if (StreamConfig.source === 'local') {
+                streamSource = StreamType.DIRECT;
                 streamConfig = {
                     videoElementId: 'remote-video',
                     audioElementId: 'remote-audio',
                     authenticate: false,
                     maxReconnects: 20,
-                    server: "",
-                    signalingServer: GetConfig().local.server,
-                    mediaServer: GetConfig().local.server,
-                    signalingPort: 49100,
-                    mediaPort: 1024,
+                    signalingServer: StreamConfig.local.server,
+                    signalingPort: StreamConfig.local.signalingPort,
+                    mediaServer: StreamConfig.local.server,
+                    ...(StreamConfig.local.mediaPort != null && { mediaPort: StreamConfig.local.mediaPort }),
                     nativeTouchEvents: true,
                     width: 1920,
                     height: 1080,
@@ -104,8 +103,8 @@ export default class AppStream extends Component<AppStreamProps, AppStreamState>
                 };
             }
                 
-            else if (GetConfig().source === 'stream') {
-                streamSource = 'direct'
+            else if (StreamConfig.source === 'stream') {
+                streamSource =  StreamType.DIRECT;
                 streamConfig = {
                     signalingServer: this.props.signalingserver,
                     signalingPort: this.props.signalingport,
@@ -133,7 +132,7 @@ export default class AppStream extends Component<AppStreamProps, AppStreamState>
             }
                 
             else {
-                console.error(`Unknown stream source: ${GetConfig().source}`);
+                console.error(`Unknown stream source: ${StreamConfig.source}`);
                 return
             }
 
@@ -156,15 +155,7 @@ export default class AppStream extends Component<AppStreamProps, AppStreamState>
     componentDidUpdate(_prevProps: AppStreamProps, prevState: AppStreamState, _snapshot: any) {
         if (prevState.streamReady === false && this.state.streamReady === true) {
             const player = document.getElementById("gfn-stream-player-video") as HTMLVideoElement;
-            
             if (player) {
-                if (GetConfig().source === "gfn")
-                {
-                    player.style.position = "relative";
-                    const container = document.getElementById("gfn-stream-player-video-container") as HTMLVideoElement;
-                    container.style.background = "white";
-                }
-
                 player.tabIndex = -1;
                 player.playsInline = true;
                 player.muted = true;
@@ -189,7 +180,7 @@ export default class AppStream extends Component<AppStreamProps, AppStreamState>
             this.props.onStarted();
         }
 
-        if (message.status === "error" && GetConfig().source === "stream")
+        if (message.status === "error" && StreamConfig.source === "stream")
         {
             console.log(message.info);
             alert(message.info);
@@ -221,7 +212,7 @@ export default class AppStream extends Component<AppStreamProps, AppStreamState>
     }
 
     render() {
-        const source = GetConfig().source;
+        const source = StreamConfig.source;
 
         if (source === 'gfn') {
             return (
@@ -238,20 +229,23 @@ export default class AppStream extends Component<AppStreamProps, AppStreamState>
             );
         } else if (source === 'local' || source === 'stream') {
             return (
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    height: '100%'
-                }}>
+                <div
+                    key={'stream-canvas'}
+                    id={'main-div'}
+                    style={{
+                        backgroundColor:this.state.streamReady ? 'white': '#dddddd',
+                        visibility: this.state.streamReady ? 'visible' : 'hidden',
+                        ...this.props.style
+                    }}
+                >
                     <video
                         key={'video-canvas'}
                         id={'remote-video'}
                         style={{
-                            maxWidth: '100vw',
-                            maxHeight: '100vh',
-                            objectFit: 'cover'
+                            left: 0,
+                            top: 0,
+                            width: '100%',
+                            height: '100%',
                         }}
                         tabIndex={-1}
                         playsInline muted

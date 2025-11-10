@@ -28,22 +28,12 @@ volumes:
 services:
   isaac-sim:
     container_name: isaac-sim
-    image: nvcr.io/nvidia/isaac-sim:5.0.0
+    image: nvcr.io/nvidia/isaac-sim:5.1.0
     restart: unless-stopped
     runtime: nvidia
     network_mode: "host"
     environment:
       - ACCEPT_EULA=Y
-    volumes:
-      - isaac-sim-cache-ov:/root/.cache/ov:rw
-      - isaac-sim-cache-pip:/root/.cache/pip:rw
-      - isaac-sim-cache-glcache:/root/.cache/nvidia/GLCache:rw
-      - isaac-sim-cache-computecache:/root/.nv/ComputeCache:rw
-      - isaac-sim-cache-asset-browser:/isaac-sim/exts/isaacsim.asset.browser/cache:rw
-      - isaac-sim-logs:/root/.nvidia-omniverse/logs:rw
-      - isaac-sim-data:/root/.local/share/ov/data:rw
-      - isaac-sim-pkg:/root/.local/share/ov/pkg:rw
-      - isaac-sim-documents:/root/Documents:rw
     deploy:
       resources:
         reservations:
