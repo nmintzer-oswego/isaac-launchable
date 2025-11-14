@@ -2,7 +2,7 @@
 
 # Isaac Launchable
 
-Isaac Launchable offers a simplified approach to installing and using [Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html) and [Isaac Sim](https://github.com/isaac-sim/IsaacSim).
+Isaac Launchable offers a simplified approach to trying [Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html) and [Isaac Sim](https://github.com/isaac-sim/IsaacSim) in a web browser.
 
 Through this project, users can interact with Isaac Sim and Isaac Lab purely from a web browser, with one tab running Visual Studio Code for development and command execution, and another tab providing the streamed user interface for Isaac Sim.
 
@@ -15,10 +15,9 @@ The installation steps for Isaac Lab are automated via Docker, such that it can 
 
 The project includes:
 - a Visual Studio Code container
-- Isaac Lab pre-installed
-- Isaac Sim pre-installed
+- Isaac Lab 2.3 container
+- Isaac Sim 5.1 container
 - an Omniverse Kit App Streaming client, based on the [web-viewer-sample](https://github.com/NVIDIA-Omniverse/web-viewer-sample) project.
-
 
 
 ## Quickstart Guide
@@ -31,16 +30,16 @@ This guide will get you started with a Visual Studio Code instance with Isaac La
 > Please note that Brev instances are pay-by-the hour. To make the best use of credits, stop instances when they are not in use. Stopped instances have a smaller storage charge.
 
 ### Deploy
-1. Click this Deploy Now button
-[![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-31ezDWyp4LvtDQr5rUhAWOUMFhn)
-2. Click the Deploy Launchable button to spin up the instance.
+1. Click this Deploy Now button ->
+[![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-35JP2ywERLgqtD0b0MIeK1HnF46)
+2. In Brev, click the Deploy Launchable button to spin up the instance.
 3. Wait for the instance to be fully ready on Brev: running, built, and the setup script has completed (first launch can take a while)
-4. On the Brev instance page, scroll to the TCP/UDP ports section.
-5. Click the link for port 80 (HTTP) to open Visual Studio Code Server.
-6. The default password is `password`. This can be modified.
-    - To change the password, modify the `PASSWORD` environment variable in this [docker-compose.yml](https://github.com/isaac-sim/isaac-launchable/blob/main/isaac-lab/docker-compose.yml) file.
-7. Inside Visual Studio Code, continue with the [README.md](https://github.com/isaac-sim/isaac-launchable/blob/main/isaac-lab/vscode/README.md) instructions. A summary is provided below.
-8. Now you're in the Visual Studio Code dev environment! 
+4. Open the `Logs` tab to view the setup script output. At the end of this output, a password will be printed. This is the password for the Visual Studio Code server. Save this somewhere safe.
+5. On the Brev instance page, scroll to the TCP/UDP ports section.
+6. Click the link for port 80 (HTTP) to open Visual Studio Code Server.
+7. Enter the password from the Logs tab in step 4.
+8. Inside Visual Studio Code, continue with the [README.md](https://github.com/isaac-sim/isaac-launchable/blob/main/isaac-lab/vscode/README.md) instructions. A summary is provided below.
+9. Now you're in the Visual Studio Code dev environment! 
 
 ### Running Isaac Sim and Isaac Lab - the quick version
 In short, the commands to run Isaac Lab and Isaac Sim are similar to workstation installs, except when you need the UI. Then we add a few arguments for streaming to the normal commands.
@@ -54,7 +53,7 @@ The top-level README.md file in the dev environment contains a shortened version
 
 1. Run the following command: 
 ```
-./isaaclab/_isaac_sim/isaac-sim.sh --no-window --enable omni.kit.livestream.webrtc
+/isaac-sim/runheadless.sh
 ```
 Note how this is similar to the workstation command for launching Isaac Sim, but uses additional arguments for streaming.
 
@@ -65,11 +64,10 @@ Note how this is similar to the workstation command for launching Isaac Sim, but
 5. After a few seconds you should see the UI in the viewer tab. The first launch may take much longer as shaders are cached.
 6. On subsequent relaunches, simply refresh this tab to see the UI.
 
-
 ### Running Isaac Lab Commands - Detailed Guide
 To run an Isaac Lab command, first consider if it requires the UI. If it doesn't, such as during policy training, simply run the command as normal.
 
-If you need to see the Isaac Sim UI, just append these additional arguments to the Isaac Lab command: `--kit_args="--no-window --enable omni.kit.livestream.webrtc"`.
+If you need to see the Isaac Sim UI, just append these additional arguments to the Isaac Lab command: `--livestream 2`.
 
 Let's try out the Ant walking task as a demo. We chose this task because it trains quickly.
 
@@ -81,7 +79,7 @@ This is essentially the same command you would run for a workstation install of 
 
 2. Once the training script is complete, test the policy behavior by running: 
 ```
-python isaaclab/scripts/reinforcement_learning/skrl/play.py --task=Isaac-Ant-v0 --kit_args="--no-window --enable omni.kit.livestream.webrtc"
+python isaaclab/scripts/reinforcement_learning/skrl/play.py --task=Isaac-Ant-v0 --livestream 2"
 ``` 
 This will launch Isaac Sim. Note how we added the `--kit_args` since we'll want to view the behavior using the Isaac Sim viewport.
 
@@ -121,22 +119,28 @@ These instructions describe how to create a customized Launchable, similar to th
 6. On the next page, add a setup script. Under the *Paste Script* tab, add this code:
 ```bash
 #!/bin/bash
+export VSCODE_PASSWORD=your_password # replace with a secure password or generate it securely
 git clone https://github.com/isaac-sim/isaac-launchable
 cd isaac-launchable/isaac-lab
 docker compose up -d
 ```
-7. Click Next.
-8. Under "Do you want a Jupyter Notebook experience" select "No, I don't want Jupyter".
-9. Select the TCP/UDP ports tab.
-10. Expose the following ports (for Visual Studio Code Server and Kit App Streaming) to a specific public IP address that will be using this service.
+7. The VSCode container expects a password to be set via the $VSCODE_PASSWORD environment variable. Add the following environment variable to the setup script. Replace `your_password` with your desired password, or generate it securely.
+```bash
+export VSCODE_PASSWORD=your_password
+```
+
+8. Click Next.
+9. Under "Do you want a Jupyter Notebook experience" select "No, I don't want Jupyter".
+10. Select the TCP/UDP ports tab.
+11. Expose the following ports (for Visual Studio Code Server and Kit App Streaming) to a specific public IP address that will be using this service.
 ```
 80
 1024
 47998
 49100
 ```
-11. Click Next.
-12. Choose your desired compute.
+12. Click Next.
+13. Choose your desired compute.
 
 > [!NOTE]
 > GPUs with RT cores are required for Kit App Streaming. 
@@ -144,8 +148,8 @@ docker compose up -d
 
 > [!IMPORTANT]
 > The project is not currently compatible with Crusoe instances. AWS has been tested and is used for the example launchable.
-13. Choose disk storage, then click Next.
-14. Enter a name, then select **Create Launchable**
+14. Choose disk storage, then click Next.
+15. Enter a name, then select **Create Launchable**
 
 Congratulations! You now have a custom launchable.
 
@@ -154,7 +158,6 @@ Congratulations! You now have a custom launchable.
 This project can also be used to run a containerized version of Isaac Sim and Isaac Lab.
 
 To use this project locally, you'll need a workstation that meets [Isaac Sim](https://docs.isaacsim.omniverse.nvidia.com/latest/installation/requirements.html)'s requirements.
-
 
 1. Install the NVIDIA Container Toolkit: `sudo install nvidia-container-toolkit`
 2. Inside [this docker-compose file](https://github.com/isaac-sim/isaac-launchable/blob/main/isaac-lab/docker-compose.yml), change the `ENV=brev` line to `ENV=localhost`.
