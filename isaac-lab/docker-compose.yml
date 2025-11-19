@@ -28,6 +28,7 @@ services:
     volumes:
       - "ov-cache:/home/isaac-sim/.cache/ov:rw"
       - "ov-local-share:/home/isaac-sim/.local/share/ov/:rw"
+      - "./custom_assets:/workspace/custom_assets:rw"
     environment:
       - CUDA_VISIBLE_DEVICES=0
       - NVIDIA_VISIBLE_DEVICES=all
